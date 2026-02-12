@@ -40,21 +40,28 @@ pktfmt udp --unicode
 ### Built-in Protocols
 
 ```bash
-pktfmt tcp                    # TCP header
-pktfmt udp                    # UDP header
-pktfmt ipv4                   # IPv4 header
-pktfmt dns                    # DNS header
-pktfmt --list                 # Show all 20+ protocols
+$ pktfmt tcp
+ 0                  1                  2                  3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          Source Port          |        Destination Port       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Sequence Number                        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                     Acknowledgment Number                     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Data Of|Reser|      Flags      |          Window Size          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|            Checksum           |         Urgent Pointer        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+:                            Options                            :
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
 ### Custom Inline Format
 
 ```bash
-pktfmt "Type:16,Length:16,Payload:*"
-```
-
-Output:
-```
+$ pktfmt "Type:16,Length:16,Payload:*"
  0                  1                  2                  3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -84,30 +91,21 @@ pktfmt packet.json
 ### Unicode Output
 
 ```bash
-pktfmt udp --unicode
-```
-
-```
+$ pktfmt udp --unicode
  0                  1                  2                  3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-┌───────────────────────────────┬───────────────────────────────┐
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 │          Source Port          │        Destination Port       │
-├───────────────────────────────┼───────────────────────────────┤
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 │             Length            │            Checksum           │
-├───────────────────────────────────────────────────────────────┤
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ┊                              Data                             ┊
-└───────────────────────────────────────────────────────────────┘
-```
-
-### Bold Unicode Style
-
-```bash
-pktfmt tcp --style bold
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
 ### Options
 
-```bash
+```
 pktfmt <input> [options]
 
 Options:
@@ -128,7 +126,7 @@ Options:
 
 | Layer | Protocols |
 |-------|-----------|
-| Layer 2 | ethernet, 802.1q, arp |
+| Layer 2 | ethernet, 8021q, arp |
 | Layer 3 | ipv4, ipv6, icmp, icmpv6 |
 | Layer 4 | tcp, udp, sctp |
 | Application | dns, dhcp, ntp, tls |
