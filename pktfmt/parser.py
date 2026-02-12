@@ -125,15 +125,22 @@ def parse_json(json_input: Union[str, Path]) -> List[Field]:
 
 
 def parse_input(input_str: str) -> List[Field]:
-    """Auto-detect and parse input format (inline or JSON file).
+    """Auto-detect and parse input format (protocol name, inline, or JSON file).
 
     Args:
-        input_str: Either an inline definition or a path to a JSON file
+        input_str: Protocol name, inline definition, or path to JSON file
 
     Returns:
         List of Field objects
     """
-    # Check if it's a file path
+    from .protocols import is_protocol, get_protocol
+
+    # Check if it's a built-in protocol name
+    if is_protocol(input_str):
+        _, field_spec = get_protocol(input_str)
+        return parse_inline(field_spec)
+
+    # Check if it's a JSON file path
     path = Path(input_str)
     if path.exists() and path.suffix.lower() == ".json":
         return parse_json(path)
