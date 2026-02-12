@@ -125,11 +125,11 @@ def render_diagram(
         prev_row = rows[i - 1] if i > 0 else None
         has_variable = any(seg.is_variable for seg in row)
 
-        lines.append(_make_separator(row, prev_row, chars, is_first_row, bits_per_row))
+        lines.append(_make_separator(row, prev_row, chars, is_first_row, bits_per_row, style))
         lines.append(_render_field_row(row, chars, has_variable))
 
     if rows:
-        lines.append(_make_bottom_separator(rows[-1], chars, bits_per_row))
+        lines.append(_make_bottom_separator(rows[-1], chars, bits_per_row, style))
 
     return "\n".join(lines)
 
@@ -154,15 +154,19 @@ def _make_separator(
     prev_row: List[FieldSegment],
     chars: BoxChars,
     is_first_row: bool,
-    bits_per_row: int
+    bits_per_row: int,
+    style: str = "ascii"
 ) -> str:
     """Generate separator line above a row."""
+    use_tick_marks = (style == "ascii")
 
     if is_first_row:
-        # Simple top border
-        result = "+"
+        # Top border with tick marks at every bit
+        result = chars.tl
         for seg in row:
-            result += "-+" * seg.width
+            result += (chars.h + chars.tj) * (seg.width - 1) + chars.h + chars.tj
+        # Replace last junction with corner
+        result = result[:-1] + chars.tr
         return result
 
     # For each bit position, determine if we need a line or space
@@ -213,14 +217,15 @@ def _make_separator(
     # Fix: we need to handle boundaries correctly
     # Let me rewrite this more carefully
 
-    return _make_separator_v2(row, prev_row, chars, bits_per_row)
+    return _make_separator_v2(row, prev_row, chars, bits_per_row, style)
 
 
 def _make_separator_v2(
     row: List[FieldSegment],
     prev_row: List[FieldSegment],
     chars: BoxChars,
-    bits_per_row: int
+    bits_per_row: int,
+    style: str = "ascii"
 ) -> str:
     """Generate separator between two rows.
 
@@ -241,56 +246,32 @@ def _make_separator_v2(
     while len(curr_continuation_map) < bits_per_row:
         curr_continuation_map.append(False)
 
-    # Get field boundaries in both rows
-    prev_boundaries = set([0])
-    pos = 0
-    for seg in prev_row:
-        pos += seg.width
-        prev_boundaries.add(pos)
-
-    curr_boundaries = set([0])
-    pos = 0
-    for seg in row:
-        pos += seg.width
-        curr_boundaries.add(pos)
-
-    all_boundaries = prev_boundaries | curr_boundaries
-
-    # Build separator
-    result = ""
+    # Tick marks at every bit
+    result = chars.lj
     for bit in range(bits_per_row):
-        # Junction at start of this bit
-        if bit == 0:
-            result += "+"
-        else:
-            # Check if we need a junction here
-            if bit in all_boundaries:
-                result += "+"
-            elif prev_continues_map[bit - 1] and curr_continuation_map[bit]:
-                # Field continues through - no junction
-                result += " "
-            else:
-                result += "+"
-
         # Line or space for this bit
-        # Draw line if: field ends above OR field starts below
-        # Draw space only if: field continues AND no new field starts
         if prev_continues_map[bit] and curr_continuation_map[bit]:
             result += " "
         else:
-            result += "-"
-
-    # Final junction
-    result += "+"
-
+            result += chars.h
+        # Junction after each bit
+        if bit == bits_per_row - 1:
+            result += chars.rj
+        elif prev_continues_map[bit] and curr_continuation_map[bit]:
+            result += " "
+        else:
+            result += chars.x
     return result
 
 
-def _make_bottom_separator(row: List[FieldSegment], chars: BoxChars, bits_per_row: int) -> str:
+def _make_bottom_separator(row: List[FieldSegment], chars: BoxChars, bits_per_row: int, style: str = "ascii") -> str:
     """Generate the final separator line at the bottom."""
-    result = "+"
+    # Tick marks at every bit
+    result = chars.bl
     for seg in row:
-        result += "-+" * seg.width
+        result += (chars.h + chars.bj) * (seg.width - 1) + chars.h + chars.bj
+    # Replace last junction with corner
+    result = result[:-1] + chars.br
     return result
 
 
