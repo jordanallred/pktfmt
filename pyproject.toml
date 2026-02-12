@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pktfmt"
-version = "0.2.0"
+version = "0.3.0"
 description = "Generate RFC-style ASCII packet diagrams from field definitions"
 readme = "README.md"
 requires-python = ">=3.8"
