@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pktfmt"
-version = "0.4.0"
+version = "0.4.1"
 description = "Generate RFC-style ASCII packet diagrams from field definitions"
 readme = "README.md"
 requires-python = ">=3.8"
-license = "MIT"
+license = { text = "MIT" }
 keywords = ["packet", "diagram", "ascii", "rfc", "network", "protocol"]
 classifiers = [
     "Development Status :: 4 - Beta",
