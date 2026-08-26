@@ -10,7 +10,7 @@ if sys.platform == "win32":
     sys.stderr.reconfigure(encoding="utf-8")
 
 from . import __version__
-from .parser import parse_input
+from .parser import parse_input, parse_json
 from .protocols import list_protocols, get_protocol
 from .renderer import render_diagram
 
@@ -26,8 +26,10 @@ Examples:
   pktfmt --list                           # Show all built-in protocols
   pktfmt "Type:16,Length:16,Payload:*"    # Custom inline format
   pktfmt packet.json                      # Load from JSON file
+  cat packet.json | pktfmt -              # Load JSON from stdin
   pktfmt udp --unicode                    # Pretty Unicode output
   pktfmt ip -b 16                         # 16 bits per row
+  pktfmt tcp -o tcp.txt                   # Write output to a file
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -35,7 +37,7 @@ Examples:
     parser.add_argument(
         "input",
         nargs="?",
-        help="Protocol name, inline 'Name:bits,...' format, or JSON file path",
+        help="Protocol name, inline 'Name:bits,...' format, JSON file path, or '-' for JSON on stdin",
     )
 
     parser.add_argument(
@@ -69,6 +71,12 @@ Examples:
         "-u", "--unicode",
         action="store_true",
         help="Use Unicode box drawing characters (shortcut for --style unicode)",
+    )
+
+    parser.add_argument(
+        "-o", "--output",
+        metavar="FILE",
+        help="Write output to FILE instead of stdout",
     )
 
     parser.add_argument(
@@ -146,14 +154,23 @@ def main(argv: Optional[List[str]] = None) -> int:
         style = "unicode"
 
     try:
-        fields = parse_input(args.input)
+        if args.input == "-":
+            fields = parse_json(sys.stdin.read())
+        else:
+            fields = parse_input(args.input)
+
         diagram = render_diagram(
             fields,
             bits_per_row=args.bits_per_row,
             show_ruler=not args.no_ruler,
             style=style,
         )
-        print(diagram)
+
+        if args.output:
+            with open(args.output, "w", encoding="utf-8") as f:
+                f.write(diagram + "\n")
+        else:
+            print(diagram)
         return 0
     except KeyError as e:
         print(f"Error: {e}", file=sys.stderr)

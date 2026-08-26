@@ -113,8 +113,12 @@ Options:
   -b, --bits-per-row N    Bits per row (default: 32)
   -s, --style STYLE       Output style: ascii, unicode
   -u, --unicode           Shortcut for --style unicode
+  -o, --output FILE       Write output to FILE instead of stdout
   --no-ruler              Omit the bit number header
   -v, --version           Show version
+
+Pass '-' as the input to read a JSON packet definition from stdin:
+  cat packet.json | pktfmt -
 ```
 
 ## Field Syntax

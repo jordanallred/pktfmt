@@ -52,3 +52,26 @@ def test_missing_input_prints_help_and_returns_1(capsys):
     out = capsys.readouterr().out
     assert exit_code == 1
     assert "usage:" in out
+
+
+def test_output_flag_writes_to_file(tmp_path, capsys):
+    out_file = tmp_path / "tcp.txt"
+    exit_code = main(["tcp", "--output", str(out_file)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out == ""
+    assert out_file.read_text().startswith(" 0")
+
+
+def test_stdin_dash_reads_json(monkeypatch, capsys):
+    import io
+
+    payload = '{"fields": [{"name": "Type", "bits": 8}]}'
+    monkeypatch.setattr("sys.stdin", io.StringIO(payload))
+
+    exit_code = main(["-", "--no-ruler"])
+    out = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Type" in out
