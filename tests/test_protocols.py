@@ -48,3 +48,17 @@ def test_all_protocol_specs_are_parseable():
     for name, (_, spec) in PROTOCOLS.items():
         fields = parse_inline(spec)
         assert len(fields) > 0, f"{name} produced no fields"
+
+
+def test_tcp_flags_match_rfc_9293_bit_layout():
+    # Data Offset(4) + Reserved(4) + 8 named 1-bit flags = 12 control bits,
+    # matching RFC 9293 Figure 1. A prior bundled definition split this as
+    # Reserved:3 + Flags:9, which put the flags region one bit too early.
+    from pktfmt.parser import parse_inline
+
+    _, spec = PROTOCOLS["tcp"]
+    fields = {f.name: f.bits for f in parse_inline(spec)}
+
+    assert fields["Reserved"] == 4
+    for flag in ["CWR", "ECE", "URG", "ACK", "PSH", "RST", "SYN", "FIN"]:
+        assert fields[flag] == 1, f"{flag} should be a single bit"

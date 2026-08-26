@@ -44,7 +44,9 @@ PROTOCOLS: Dict[str, Tuple[str, str]] = {
     # Layer 4
     "tcp": (
         "Transmission Control Protocol",
-        "Source Port:16,Destination Port:16,Sequence Number:32,Acknowledgment Number:32,Data Offset:4,Reserved:3,Flags:9,Window Size:16,Checksum:16,Urgent Pointer:16,Options:*"
+        "Source Port:16,Destination Port:16,Sequence Number:32,Acknowledgment Number:32,"
+        "Data Offset:4,Reserved:4,CWR:1,ECE:1,URG:1,ACK:1,PSH:1,RST:1,SYN:1,FIN:1,"
+        "Window:16,Checksum:16,Urgent Pointer:16,Options:*"
     ),
     "udp": (
         "User Datagram Protocol",
