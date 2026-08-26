@@ -60,7 +60,7 @@ Examples:
 
     parser.add_argument(
         "-s", "--style",
-        choices=["ascii", "unicode", "bold"],
+        choices=["ascii", "unicode"],
         default="ascii",
         help="Output style (default: ascii)",
     )

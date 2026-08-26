@@ -111,7 +111,7 @@ pktfmt <input> [options]
 Options:
   -l, --list              List all built-in protocols
   -b, --bits-per-row N    Bits per row (default: 32)
-  -s, --style STYLE       Output style: ascii, unicode, bold
+  -s, --style STYLE       Output style: ascii, unicode
   -u, --unicode           Shortcut for --style unicode
   --no-ruler              Omit the bit number header
   -v, --version           Show version

@@ -31,12 +31,6 @@ UNICODE_CHARS = BoxChars(
     tj="┬", bj="┴", lj="├", rj="┤", x="┼", v_var="┊"
 )
 
-# Unicode bold/heavy
-UNICODE_BOLD_CHARS = BoxChars(
-    h="━", v="┃", tl="┏", tr="┓", bl="┗", br="┛",
-    tj="┳", bj="┻", lj="┣", rj="┫", x="╋", v_var="┇"
-)
-
 
 class FieldSegment(NamedTuple):
     """A segment of a field within a single row."""
@@ -52,7 +46,6 @@ def get_box_chars(style: str) -> BoxChars:
     styles = {
         "ascii": ASCII_CHARS,
         "unicode": UNICODE_CHARS,
-        "bold": UNICODE_BOLD_CHARS,
     }
     return styles.get(style, ASCII_CHARS)
 
@@ -125,11 +118,11 @@ def render_diagram(
         prev_row = rows[i - 1] if i > 0 else None
         has_variable = any(seg.is_variable for seg in row)
 
-        lines.append(_make_separator(row, prev_row, chars, is_first_row, bits_per_row, style))
+        lines.append(_make_separator(row, prev_row, chars, is_first_row, bits_per_row))
         lines.append(_render_field_row(row, chars, has_variable))
 
     if rows:
-        lines.append(_make_bottom_separator(rows[-1], chars, bits_per_row, style))
+        lines.append(_make_bottom_separator(rows[-1], chars, bits_per_row))
 
     return "\n".join(lines)
 
@@ -155,11 +148,8 @@ def _make_separator(
     chars: BoxChars,
     is_first_row: bool,
     bits_per_row: int,
-    style: str = "ascii"
 ) -> str:
     """Generate separator line above a row."""
-    use_tick_marks = (style == "ascii")
-
     if is_first_row:
         # Top border with tick marks at every bit
         result = chars.tl
@@ -169,63 +159,14 @@ def _make_separator(
         result = result[:-1] + chars.tr
         return result
 
-    # For each bit position, determine if we need a line or space
-    # Line is drawn if: field ends above OR field starts below
-    # Space is drawn if: same field continues through this boundary
-
-    # Build arrays for: does field end at this bit (from prev_row)?
-    #                   does field start at this bit (from row)?
-    prev_ends = []      # True if the field in prev_row ends here (not continues_next)
-    curr_starts = []    # True if the field in row starts here (not is_continuation)
-
-    for seg in prev_row:
-        prev_ends.extend([False] * (seg.width - 1) + [not seg.continues_next])
-
-    for seg in row:
-        curr_starts.extend([not seg.is_continuation] + [False] * (seg.width - 1))
-
-    # Pad arrays
-    while len(prev_ends) < bits_per_row:
-        prev_ends.append(True)
-    while len(curr_starts) < bits_per_row:
-        curr_starts.append(True)
-
-    # Build the separator
-    result = "+"
-
-    pos = 0
-    for seg in row:
-        for bit_offset in range(seg.width):
-            bit_pos = pos + bit_offset
-
-            # Does this bit need a line above it?
-            # Yes if: field ended in prev row at or before this position
-            #     OR: field starts in current row at or after this position
-            # Actually simpler: draw line if field_above ended OR field_below starts
-            # Draw space if same field continues through
-
-            # Check if this bit is a continuation from above
-            needs_line = not seg.is_continuation
-
-            if needs_line:
-                result += "-+"
-            else:
-                result += " +"
-
-        pos += seg.width
-
-    # Fix: we need to handle boundaries correctly
-    # Let me rewrite this more carefully
-
-    return _make_separator_v2(row, prev_row, chars, bits_per_row, style)
+    return _make_row_separator(row, prev_row, chars, bits_per_row)
 
 
-def _make_separator_v2(
+def _make_row_separator(
     row: List[FieldSegment],
     prev_row: List[FieldSegment],
     chars: BoxChars,
     bits_per_row: int,
-    style: str = "ascii"
 ) -> str:
     """Generate separator between two rows.
 
@@ -264,7 +205,7 @@ def _make_separator_v2(
     return result
 
 
-def _make_bottom_separator(row: List[FieldSegment], chars: BoxChars, bits_per_row: int, style: str = "ascii") -> str:
+def _make_bottom_separator(row: List[FieldSegment], chars: BoxChars, bits_per_row: int) -> str:
     """Generate the final separator line at the bottom."""
     # Tick marks at every bit
     result = chars.bl
